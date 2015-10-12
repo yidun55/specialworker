@@ -19,9 +19,10 @@ class SpecialWorker(Spider):
     上抓取特种作业人员信息数据并写入到文件中
     """
     name = 'special'
+    download_delay = 1
     start_urls = ['http://manager.zjsafety.gov.cn/search.do?page=1&method=getSpecialworkerPage&&flag=z&&temp=index']
     model_urls = "http://manager.zjsafety.gov.cn/search.do?page=%s&method=getSpecialworkerPage&&flag=z&&temp=index"
-    writeInFile = "E:/DLdata/special.txt"
+    writeInFile = "/home/dyh/data/specialworker/special.txt"
 
     def set_crawler(self,crawler):
         super(SpecialWorker, self).set_crawler(crawler)
@@ -49,12 +50,11 @@ class SpecialWorker(Spider):
             tail_url = sel.xpath(u"//a[text()='尾页']/@href").extract()[0]
             pat = r"page=([\d]*)"
             pages = re.findall(pat, tail_url)[0]
-            print pages, "@@@@@@@@@@@@@@@@@@@@@@@@@@@"
             pages = int(pages)
         except:
             log.msg("tial pages un-get尾页未提取到",level=log.ERROR)
             pages = 52918
-        for i in range(1, pages+1)[1:7]:
+        for i in xrange(1, pages+1):
             yield Request(self.model_urls %i, callback=self.detail,\
                 dont_filter=True)
 
@@ -73,10 +73,14 @@ class SpecialWorker(Spider):
                 container.append(i.xpath("./td[4]/text()").extract()[0].strip())
                 container.append(i.xpath("./td[6]/text()").extract()[0].strip())
                 container.append(i.xpath("./td[7]/text()").extract()[0].strip())
+                #==============================================================
+                #提取第二元素
                 raw_con2 = i.xpath("./td[2]/script/text()").extract()[0]
                 pat2 = r"sex='([\d])"
                 sexy = re.findall(pat2, raw_con2)
                 container.append(sexy[0])
+                #==============================================================
+                #提取第五个元素
                 raw_con5 = i.xpath("./td[5]/script/text()").extract()[0]
                 pat5 = r"card='([\d]*)"
                 id_card = re.findall(pat5, raw_con5)
