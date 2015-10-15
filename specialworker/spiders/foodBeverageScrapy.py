@@ -60,7 +60,7 @@ class FoodBeverage(Spider):
 
         for i in xrange(1, int(pages)+1):
             yield FormRequest(self.model_urls,
-                formdata={"onkeydown":str(i)},
+                formdata={"pAttr.pageCur":str(i)},
                 callback=self.detail, dont_filter=True)
 
     def detail(self, response):
