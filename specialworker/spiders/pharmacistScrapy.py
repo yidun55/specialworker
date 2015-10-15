@@ -19,9 +19,10 @@ class Pharmacist(Spider):
     上抓取执业药师信息数据并写入到文件中
     """
     name = 'pharmacist'
+    download_delay = 1
     start_urls = ['http://www.iplaypython.com']
     model_urls = "http://fw.zjfda.gov.cn/sp/personnel!new_app_zyysList.do"
-    writeInFile = "E:/DLdata/pharmacist.txt"
+    writeInFile = "/home/dyh/data/specialworker/pharmacist.txt"
 
     def set_crawler(self,crawler):
         super(Pharmacist, self).set_crawler(crawler)
@@ -57,7 +58,7 @@ class Pharmacist(Spider):
             pages = 1086
             log.msg("unget total pages######################################", level=log.ERROR)
 
-        for i in range(1, int(pages)+1)[1:8]:
+        for i in xrange(1, int(pages)+1):
             yield FormRequest(self.model_urls,
                 formdata={"onkeydown":str(i)},
                 callback=self.detail, dont_filter=True)

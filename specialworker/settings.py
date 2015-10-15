@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'specialworker.spiders'
 DEFAULT_ITEM_CLASS = 'specialworker.items.SpecialworkerItem'
 ITEM_PIPELINES={'specialworker.pipelines.SpecialworkerPipeline':0}
 
-#LOG_FILE = "/home/dyh/data/specialworker/log"
+LOG_FILE = "/home/dyh/data/specialworker/log"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent

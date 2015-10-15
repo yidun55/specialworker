@@ -19,9 +19,10 @@ class FoodBeverage(Spider):
     上抓取餐饮服务许可证信息数据并写入到文件中
     """
     name = 'food'
+    download_delay = 1
     start_urls = ['http://www.iplaypython.com']
     model_urls = "http://fw.zjfda.gov.cn/sp/cyfw!new_app_cyfwList.do"
-    writeInFile = "E:/DLdata/foodBeverage.txt"
+    writeInFile = "/home/dyh/data/specialworker/foodBeverage.txt"
 
     def set_crawler(self,crawler):
         super(FoodBeverage, self).set_crawler(crawler)
@@ -57,7 +58,7 @@ class FoodBeverage(Spider):
             pages = 9348
             log.msg("unget total pages######################################", level=log.ERROR)
 
-        for i in range(1, int(pages)+1)[1:8]:
+        for i in xrange(1, int(pages)+1):
             yield FormRequest(self.model_urls,
                 formdata={"onkeydown":str(i)},
                 callback=self.detail, dont_filter=True)
