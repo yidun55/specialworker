@@ -16,8 +16,19 @@ NEWSPIDER_MODULE = 'specialworker.spiders'
 DEFAULT_ITEM_CLASS = 'specialworker.items.SpecialworkerItem'
 ITEM_PIPELINES={'specialworker.pipelines.SpecialworkerPipeline':0}
 
-LOG_FILE = "/home/dyh/data/specialworker/log"
+LOG_FILE = "/home/dyh/data/specialworker/judicial/log"
 
+
+SPIDER_MIDDLEWARES = {
+    # handle 302 deleted error
+    'specialworker.middlewares.Redirect302Middleware': 49
+}
+
+DOWNLOADER_MIDDLEWARES = {
+    # this middleware handles redirection of requests based on response status.
+    'scrapy.contrib.downloadermiddleware.redirect.RedirectMiddleware': None,
+
+}
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'specialworker (+http://www.yourdomain.com)'
