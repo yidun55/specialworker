@@ -19,7 +19,7 @@ class FoodBeverage(Spider):
     上抓取餐饮服务许可证信息数据并写入到文件中
     """
     name = 'food'
-    download_delay = 1
+    #download_delay = 1
     start_urls = ['http://www.iplaypython.com']
     model_urls = "http://fw.zjfda.gov.cn/sp/cyfw!new_app_cyfwList.do"
     writeInFile = "/home/dyh/data/specialworker/foodBeverage.txt"

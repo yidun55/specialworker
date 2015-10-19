@@ -19,7 +19,7 @@ class Pharmacist(Spider):
     上抓取执业药师信息数据并写入到文件中
     """
     name = 'pharmacist'
-    download_delay = 1
+    #download_delay = 1
     start_urls = ['http://www.iplaypython.com']
     model_urls = "http://fw.zjfda.gov.cn/sp/personnel!new_app_zyysList.do"
     writeInFile = "/home/dyh/data/specialworker/pharmacist.txt"
