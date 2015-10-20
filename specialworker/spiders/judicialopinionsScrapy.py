@@ -106,7 +106,17 @@ class JudicialOpinions(Spider):
         up_time = sel.xpath("//div[@id='wsTime']/span/text()").re(u"提交时间：(.*)")
         id_case = sel.xpath("//div[@id='DocArea']/div[contains(@style, 'TEXT-ALIGN: right')][1]/text()").extract()
         i_url = response.url
-        doc = sel.xpath("//div[@id='DocArea']/*[count(*)=0]/text()").extract()
+        if len(id_case) != 0:
+            doc = sel.xpath("//div[@id='DocArea']/*[count(*)=0]/text()").extract()
+        else:
+            tmp = sel.xpath("//div[@id='DocArea']")
+            container = tmp.xpath("string(.)").extract()
+            tmp1 = container[0].strip().split()
+            if len(tmp1) >=3:
+                id_case = [tmp1[2]]
+            else:
+                id_case = [""]
+            doc = [i.strip() for i in tmp1]
         try:
             con = [court[0], classi[0], title[0],up_time[0],
             id_case[0], i_url]
