@@ -111,25 +111,23 @@ class JudicialOpinions(Spider):
         else:
             tmp = sel.xpath("//div[@id='DocArea']")
             container = tmp.xpath("string(.)").extract()
-            tmp1 = container[0].strip().split()
-            if len(tmp1) >=3:
-                id_case = [tmp1[2]]
+            tmp1 = container[0].strip().split("\n")
+            tmp1 = [i.strip() for i in tmp1]
+            tmp2 = [i for i in tmp1 if (len(i)!=0 and len(filter(str.isalnum, i.encode('utf-8')))/float(len(i))<0.35)]
+            if len(tmp2) >=3:
+                id_case = [tmp2[2]]
             else:
                 id_case = [""]
-            doc = [i.strip() for i in tmp1]
+            doc = tmp2
         try:
             con = [court[0], classi[0], title[0],up_time[0],
             id_case[0], i_url]
             con = [i.strip() for i in con]
-            con.append("\002".join(doc))
+            doc = "".join([i.strip() for i in "\002".join(doc).split("\n")])  #去除"\n"
+            con.append(doc)
             item['content'] = "\001".join(con)+"\n"
             yield item
         except Exception,e:
             log.msg("undown url=%s info=%s"%(response.request.url,\
                 e), level=log.ERROR)
-
-
-
-
-
 
