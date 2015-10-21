@@ -125,7 +125,7 @@ class JudicialOpinions(Spider):
             判别id_case是否是id号
             """
             pat = ur"第[\d]"
-            isid = len(re.findall(pat, id_case))
+            isid = len(re.findall(pat, id_case[0]))
             if isid == 0:
                 id_case = [""]
             #================================================
