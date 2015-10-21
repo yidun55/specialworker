@@ -112,14 +112,23 @@ class JudicialOpinions(Spider):
             tmp = sel.xpath("//div[@id='DocArea']")
             container = tmp.xpath("string(.)").extract()
             tmp1 = container[0].strip().split("\n")
-            tmp1 = [i.strip() for i in tmp1]
-            tmp2 = [i for i in tmp1 if (len(i)!=0 and len(filter(str.isalpha, i.encode('utf-8')))/float(len(i))<0.35)]
+            tmp1_1 = [i.strip() for i in tmp1]
+            tmp2 = [i for i in tmp1_1 if (len(i)!=0 and len(filter(str.isalpha, i.encode('utf-8')))/float(len(i))<0.35)]
             if len(tmp2) >=3:
                 id_case = [tmp2[2]]
             else:
                 id_case = [""]
             doc = tmp2
         try:
+            #================================================
+            """
+            判别id_case是否是id号
+            """
+            pat = ur"第[\d]"
+            isid = len(re.findall(pat, id_case))
+            if isid == 0:
+                id_case = [""]
+            #================================================
             con = [court[0], classi[0], title[0],up_time[0],
             id_case[0], i_url]
             con = [i.strip() for i in con]
