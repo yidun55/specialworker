@@ -113,7 +113,7 @@ class JudicialOpinions(Spider):
             container = tmp.xpath("string(.)").extract()
             tmp1 = container[0].strip().split("\n")
             tmp1 = [i.strip() for i in tmp1]
-            tmp2 = [i for i in tmp1 if (len(i)!=0 and len(filter(str.isalnum, i.encode('utf-8')))/float(len(i))<0.35)]
+            tmp2 = [i for i in tmp1 if (len(i)!=0 and len(filter(str.isalpha, i.encode('utf-8')))/float(len(i))<0.35)]
             if len(tmp2) >=3:
                 id_case = [tmp2[2]]
             else:
