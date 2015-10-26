@@ -38,7 +38,7 @@ class Redirect302Middleware(object):
                 request.dont_filter = True
                 return [request]
             else:
-                log.msg("give_up_ul=%s"%request.url, level=log.ERROR)
+                log.msg("give_up_ul==%s=="%request.url, level=log.ERROR)
                 return []
 
 

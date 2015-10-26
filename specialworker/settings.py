@@ -17,7 +17,7 @@ DEFAULT_ITEM_CLASS = 'specialworker.items.SpecialworkerItem'
 ITEM_PIPELINES={'specialworker.pipelines.SpecialworkerPipeline':0}
 
 LOG_FILE = "/home/dyh/data/specialworker/judicial/log"
-
+#DUPEFILTER_CLASS = 'specialworker.SeenURLFilter.SeenURLFilter'
 
 SPIDER_MIDDLEWARES = {
     # handle 302 deleted error

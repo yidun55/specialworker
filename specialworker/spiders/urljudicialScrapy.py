@@ -6,6 +6,7 @@ from scrapy import log
 from scrapy import Request, FormRequest
 from scrapy import Selector
 from scrapy import signals
+from scrapy.dupefilter import RFPDupeFilter
 from specialworker.items import *
 import re
 
@@ -18,12 +19,14 @@ class JudicialOpinions(Spider):
     从http://www.court.gov.cn/zgcpwsw/sc/scsdzszjrmfy/zx/
     上抓取判决书数据并写入到文件中
     """
-    name = 'judicial'
+    name = 'j_url'
     download_delay = 1
     start_urls = ['http://www.iplaypython.com']
     model_urls = "http://www.court.gov.cn/zgcpwsw/zj/"
-    writeInFile = "/home/dyh/data/specialworker/judicial/judicial.txt"
+    writeInFile = "/home/dyh/data/specialworker/judicial/url_j.txt"
     #writeInFile = "E:/DLdata/judicial.txt"
+    haveRequested = "/home/dyh/data/specialworker/judicial/haveRequestedUrl.txt"
+    #haveRequested = "E:/DLdata/haveRequestedUrl.txt"
 
     def set_crawler(self,crawler):
         super(JudicialOpinions, self).set_crawler(crawler)
@@ -37,7 +40,14 @@ class JudicialOpinions(Spider):
             signal=signals.spider_closed)  #爬虫关闭时，关闭文件
 
     def open_file(self):
-        self.file_handler = open(self.writeInFile, "a")
+        self.file_handler = open(self.writeInFile, "a")  #写内容
+        self.file_haveRequested = open(self.haveRequested, "a+")  #写入已请求的url
+        rm_dup = RFPDupeFilter()
+        for url in self.file_haveRequested:
+            req = Request(url.strip())
+            rm_dup.request_seen(req)
+
+
 
     def close_file(self):
         self.file_handler.close()
@@ -55,8 +65,9 @@ class JudicialOpinions(Spider):
         urls = sel.xpath(u"//table[@class='tbfy']/tr/td/a/@href").extract()
         urls = [baseurl + i.split("/")[1]+"/" for i in urls]
         classi = ['ms','xs','xz','zscp','pc','zx']
-        for url in urls:
-            for i in classi:
+        for url in urls[0:1]:
+            for i in classi[0:1]:   #for test
+                self.file_haveRequested.write(url+i+"/"+"\n")
                 yield Request(url+i+"/", callback=self.pages, 
                     dont_filter=True)
 
@@ -71,70 +82,27 @@ class JudicialOpinions(Spider):
             try:
                 pages = sel.xpath("//div[@id='bottom_right_con_five_xsaj']//script").re("createPageHTML\(([\d]*?),")[0]
                 baseurl = response.url
-                for i in range(1, int(pages)):
+                for i in range(1, int(pages)+1)[0:1]: #fort test
+                    self.file_haveRequested.write(baseurl+"index_"+str(i)+".htm"+"\n")
                     yield Request(baseurl+"index_"+str(i)+".htm", 
-                        callback = self.cases, dont_filter=True)
+                        callback = self.cases, dont_filter=False)
             except Exception, e:
-                log.msg("only_one url=%s error=%s" %(response.url,\
+                log.msg("only_one url==%s== error=%s" %(response.url,\
                     e), level=log.ERROR)
     
     def cases(self, response):
         """
         提取各个案件的url
         """
+        item = SpecialworkerItem()
         sel = Selector(text=response.body)
         urls = sel.xpath("//div[@id='bottom_right_con_five_xsaj']//ul\
                     /li/div/div[2]/a/@href").extract()
         r_url = response.url
         baseurl = "/".join(r_url.split("/")[:6])
         urls = [baseurl+i[1:] for i in urls]
-        for url in urls:
-            yield Request(url, callback=self.detail, 
-                dont_filter=True)
-
-    def detail(self, response):
-        """
-        提取判决书的详细信息
-        """
-        item = SpecialworkerItem()
-        sel = Selector(text=response.body)
-        court = sel.xpath("//div[@id='nav']/a[2]/text()").extract()
-        classi = sel.xpath("//div[@id='nav']/a[3]/text()").extract()
-        title = sel.xpath("//div[@id='ws']//tr[1]/td/div/text()").extract()
-        up_time = sel.xpath("//div[@id='wsTime']/span/text()").re(u"提交时间：(.*)")
-        id_case = sel.xpath("//div[@id='DocArea']/div[contains(@style, 'TEXT-ALIGN: right')][1]/text()").extract()
-        i_url = response.url
-        if len(id_case) != 0:
-            doc = sel.xpath("//div[@id='DocArea']/*[count(*)=0]/text()").extract()
-        else:
-            tmp = sel.xpath("//div[@id='DocArea']")
-            container = tmp.xpath("string(.)").extract()
-            tmp1 = container[0].strip().split("\n")
-            tmp1_1 = [i.strip() for i in tmp1]
-            tmp2 = [i for i in tmp1_1 if (len(i)!=0 and len(filter(str.isalpha, i.encode('utf-8')))/float(len(i))<0.35)]
-            if len(tmp2) >=3:
-                id_case = [tmp2[2]]
-            else:
-                id_case = [""]
-            doc = tmp2
-        try:
-            #================================================
-            """
-            判别id_case是否是id号
-            """
-            pat = ur"第[\d]"
-            isid = len(re.findall(pat, id_case[0]))
-            if isid == 0:
-                id_case = [""]
-            #================================================
-            con = [court[0], classi[0], title[0],up_time[0],
-            id_case[0], i_url]
-            con = [i.strip() for i in con]
-            doc = "".join([i.strip() for i in "\002".join(doc).split("\n")])  #去除"\n"
-            con.append(doc)
-            item['content'] = "\001".join(con)+"\n"
-            yield item
-        except Exception,e:
-            log.msg("undown url=%s info=%s"%(response.request.url,\
-                e), level=log.ERROR)
-
+        con_url = ""
+        for url in urls[0:1]:     #for test
+            con_url += (url+"\n")
+        item["content"] = con_url
+        yield item
