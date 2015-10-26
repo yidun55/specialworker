@@ -41,13 +41,7 @@ class JudicialOpinions(Spider):
 
     def open_file(self):
         self.file_handler = open(self.writeInFile, "a")  #写内容
-        self.file_haveRequested = open(self.haveRequested, "a+")  #写入已请求的url
-        rm_dup = RFPDupeFilter()
-        for url in self.file_haveRequested:
-            req = Request(url.strip())
-            rm_dup.request_seen(req)
-
-
+        self.file_haveRequested = open(self.haveRequested, "a+")  #写入已请求成功的url
 
     def close_file(self):
         self.file_handler.close()
@@ -67,7 +61,7 @@ class JudicialOpinions(Spider):
         classi = ['ms','xs','xz','zscp','pc','zx']
         for url in urls[0:1]:
             for i in classi[0:1]:   #for test
-                self.file_haveRequested.write(url+i+"/"+"\n")
+                # self.file_haveRequested.write(url+i+"/"+"\n")
                 yield Request(url+i+"/", callback=self.pages, 
                     dont_filter=True)
 
@@ -76,6 +70,7 @@ class JudicialOpinions(Spider):
         提取各种案件的页数，并发起请求
         """
         sel = Selector(text=response.body)
+        self.file_haveRequested.write(response.url+"\n")
         self.cases(response)   #提取首页的内容
         iscontinue = len(sel.xpath("//div[@id='bottom_right_con_five_xsaj']//ul"))
         if iscontinue:  #如果当前页不为空
@@ -83,7 +78,7 @@ class JudicialOpinions(Spider):
                 pages = sel.xpath("//div[@id='bottom_right_con_five_xsaj']//script").re("createPageHTML\(([\d]*?),")[0]
                 baseurl = response.url
                 for i in range(1, int(pages)+1)[0:1]: #fort test
-                    self.file_haveRequested.write(baseurl+"index_"+str(i)+".htm"+"\n")
+                    # self.file_haveRequested.write(baseurl+"index_"+str(i)+".htm"+"\n")
                     yield Request(baseurl+"index_"+str(i)+".htm", 
                         callback = self.cases, dont_filter=False)
             except Exception, e:
@@ -96,6 +91,7 @@ class JudicialOpinions(Spider):
         """
         item = SpecialworkerItem()
         sel = Selector(text=response.body)
+        self.file_haveRequested.write(response.url+"\n")
         urls = sel.xpath("//div[@id='bottom_right_con_five_xsaj']//ul\
                     /li/div/div[2]/a/@href").extract()
         r_url = response.url

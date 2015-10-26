@@ -4,7 +4,6 @@ from scrapy import log
 from scrapy.exceptions import CloseSpider, IgnoreRequest
 
 
-
 class IgnoreHttpError(IgnoreRequest):
     """A non-200 response was filtered
     """
@@ -40,8 +39,6 @@ class Redirect302Middleware(object):
             else:
                 log.msg("give_up_ul==%s=="%request.url, level=log.ERROR)
                 return []
-
-
 
 
 
