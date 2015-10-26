@@ -6,7 +6,7 @@ from scrapy import log
 from scrapy import Request, FormRequest
 from scrapy import Selector
 from scrapy import signals
-from scrapy.dupefilter import RFPDupeFilter
+from scrapy.utils.request import request_fingerprint
 from specialworker.items import *
 import re
 
@@ -21,12 +21,12 @@ class JudicialOpinions(Spider):
     """
     name = 'j_url'
     download_delay = 1
-    start_urls = ['http://www.iplaypython.com']
+    start_urls = ['http://www.baidu.com']
     model_urls = "http://www.court.gov.cn/zgcpwsw/zj/"
-    writeInFile = "/home/dyh/data/specialworker/judicial/url_j.txt"
-    #writeInFile = "E:/DLdata/judicial.txt"
-    haveRequested = "/home/dyh/data/specialworker/judicial/haveRequestedUrl.txt"
-    #haveRequested = "E:/DLdata/haveRequestedUrl.txt"
+    # writeInFile = "/home/dyh/data/specialworker/judicial/url_j.txt"
+    writeInFile = "E:/DLdata/judicial_url.txt"
+    # haveRequested = "/home/dyh/data/specialworker/judicial/haveRequestedUrl.txt"
+    haveRequested = "E:/DLdata/haveRequestedUrl.txt"
 
     def set_crawler(self,crawler):
         super(JudicialOpinions, self).set_crawler(crawler)
@@ -42,6 +42,15 @@ class JudicialOpinions(Spider):
     def open_file(self):
         self.file_handler = open(self.writeInFile, "a")  #写内容
         self.file_haveRequested = open(self.haveRequested, "a+")  #写入已请求成功的url
+        self.url_have_seen = set()
+        for line in self.file_haveRequested:
+            fp = self.url_fingerprint(line)
+            self.url_have_seen.add(fp)
+
+    def url_fingerprint(self, url):
+        req = Request(url.strip())
+        fp = request_fingerprint(req)
+        return fp 
 
     def close_file(self):
         self.file_handler.close()
@@ -59,18 +68,25 @@ class JudicialOpinions(Spider):
         urls = sel.xpath(u"//table[@class='tbfy']/tr/td/a/@href").extract()
         urls = [baseurl + i.split("/")[1]+"/" for i in urls]
         classi = ['ms','xs','xz','zscp','pc','zx']
-        for url in urls[0:1]:
+        for url in urls[0:10]:
             for i in classi[0:1]:   #for test
-                # self.file_haveRequested.write(url+i+"/"+"\n")
+                # fp = self.url_fingerprint(url+i+"/") #remove duplification
+                # if fp not in self.url_have_seen:
+                #     self.url_have_seen.add(fp)
+                #     yield Request(url+i+"/", callback=self.pages, 
+                #         dont_filter=True)
+                # else:
+                #     pass
                 yield Request(url+i+"/", callback=self.pages, 
-                    dont_filter=True)
+                    dont_filter=False)
+
 
     def pages(self, response):
         """
         提取各种案件的页数，并发起请求
         """
         sel = Selector(text=response.body)
-        self.file_haveRequested.write(response.url+"\n")
+        # self.file_haveRequested.write(response.url+"\n")
         self.cases(response)   #提取首页的内容
         iscontinue = len(sel.xpath("//div[@id='bottom_right_con_five_xsaj']//ul"))
         if iscontinue:  #如果当前页不为空
@@ -78,9 +94,17 @@ class JudicialOpinions(Spider):
                 pages = sel.xpath("//div[@id='bottom_right_con_five_xsaj']//script").re("createPageHTML\(([\d]*?),")[0]
                 baseurl = response.url
                 for i in range(1, int(pages)+1)[0:1]: #fort test
-                    # self.file_haveRequested.write(baseurl+"index_"+str(i)+".htm"+"\n")
-                    yield Request(baseurl+"index_"+str(i)+".htm", 
-                        callback = self.cases, dont_filter=False)
+                    fp = self.url_fingerprint(baseurl+"index_"+str(i)+".htm")
+                    if fp not in self.url_have_seen:
+                        self.url_have_seen.add(fp)
+                        yield Request(baseurl+"index_"+str(i)+".htm", 
+                            callback = self.cases, dont_filter=False)
+                    else:
+                        pass
+                    # yield Request(baseurl+"index_"+str(i)+".htm", 
+                    #         callback = self.cases, dont_filter=False)                    
+
+
             except Exception, e:
                 log.msg("only_one url==%s== error=%s" %(response.url,\
                     e), level=log.ERROR)
@@ -97,8 +121,8 @@ class JudicialOpinions(Spider):
         r_url = response.url
         baseurl = "/".join(r_url.split("/")[:6])
         urls = [baseurl+i[1:] for i in urls]
-        con_url = ""
+        con = ""
         for url in urls[0:1]:     #for test
-            con_url += (url+"\n")
-        item["content"] = con_url
+            con += (url+"\n")
+        item["content"] = con
         yield item
