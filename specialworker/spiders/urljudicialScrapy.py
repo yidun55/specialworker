@@ -23,10 +23,10 @@ class JudicialOpinions(Spider):
     download_delay = 1
     start_urls = ['http://www.baidu.com']
     model_urls = "http://www.court.gov.cn/zgcpwsw/zj/"
-    # writeInFile = "/home/dyh/data/specialworker/judicial/url_j.txt"
-    writeInFile = "E:/DLdata/judicial_url.txt"
-    # haveRequested = "/home/dyh/data/specialworker/judicial/haveRequestedUrl.txt"
-    haveRequested = "E:/DLdata/haveRequestedUrl.txt"
+    writeInFile = "/home/dyh/data/specialworker/judicial/url_j.txt"
+    # writeInFile = "E:/DLdata/judicial_url.txt"
+    haveRequested = "/home/dyh/data/specialworker/judicial/haveRequestedUrl.txt"
+    # haveRequested = "E:/DLdata/haveRequestedUrl.txt"
 
     def set_crawler(self,crawler):
         super(JudicialOpinions, self).set_crawler(crawler)
@@ -68,8 +68,8 @@ class JudicialOpinions(Spider):
         urls = sel.xpath(u"//table[@class='tbfy']/tr/td/a/@href").extract()
         urls = [baseurl + i.split("/")[1]+"/" for i in urls]
         classi = ['ms','xs','xz','zscp','pc','zx']
-        for url in urls[0:10]:
-            for i in classi[0:1]:   #for test
+        for url in urls:
+            for i in classi:   #for test
                 # fp = self.url_fingerprint(url+i+"/") #remove duplification
                 # if fp not in self.url_have_seen:
                 #     self.url_have_seen.add(fp)
@@ -93,7 +93,7 @@ class JudicialOpinions(Spider):
             try:
                 pages = sel.xpath("//div[@id='bottom_right_con_five_xsaj']//script").re("createPageHTML\(([\d]*?),")[0]
                 baseurl = response.url
-                for i in range(1, int(pages)+1)[0:1]: #fort test
+                for i in range(1, int(pages)+1): #fort test
                     fp = self.url_fingerprint(baseurl+"index_"+str(i)+".htm")
                     if fp not in self.url_have_seen:
                         self.url_have_seen.add(fp)
@@ -115,7 +115,7 @@ class JudicialOpinions(Spider):
         """
         item = SpecialworkerItem()
         sel = Selector(text=response.body)
-        self.file_haveRequested.write(response.url+"\n")
+        self.file_haveRequested.write(response.url+"\n") #记录已请求的页面url
         urls = sel.xpath("//div[@id='bottom_right_con_five_xsaj']//ul\
                     /li/div/div[2]/a/@href").extract()
         r_url = response.url

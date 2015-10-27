@@ -23,12 +23,12 @@ class JudicialOpinions(Spider):
     download_delay = 1
     start_urls = ['http://www.baidu.com']
     model_urls = "http://www.court.gov.cn/zgcpwsw/zj/"
-    # writeInFile = "/home/dyh/data/specialworker/judicial/url_j.txt"
-    writeInFile = "E:/DLdata/judicial.txt"
-    #controlFile = "/home/dyh/data/specialworker/judicial/judicial_url.txt"
-    controlFile = "E:/DLdata/judicial_url.txt"
-    # haveRequested = "/home/dyh/data/specialworker/judicial/haveRequestedUrl.txt"
-    haveRequested = "E:/DLdata/haveRequestedDetail.txt"
+    writeInFile = "/home/dyh/data/specialworker/judicial/judicial.txt"
+    # writeInFile = "E:/DLdata/judicial.txt"
+    controlFile = "/home/dyh/data/specialworker/judicial/judicial_url.txt"
+    # controlFile = "E:/DLdata/judicial_url.txt"
+    haveRequested = "/home/dyh/data/specialworker/judicial/haveRequestedDetail.txt"
+    # haveRequested = "E:/DLdata/haveRequestedDetail.txt"
 
     def set_crawler(self,crawler):
         super(JudicialOpinions, self).set_crawler(crawler)
