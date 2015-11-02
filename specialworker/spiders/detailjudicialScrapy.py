@@ -25,7 +25,7 @@ class JudicialOpinions(Spider):
     model_urls = "http://www.court.gov.cn/zgcpwsw/zj/"
     writeInFile = "/home/dyh/data/specialworker/judicial/judicial.txt"
     # writeInFile = "E:/DLdata/judicial.txt"
-    controlFile = "/home/dyh/data/specialworker/judicial/judicial_url.txt"
+    controlFile = "/home/dyh/data/specialworker/judicial/all_url_j.txt"
     # controlFile = "E:/DLdata/judicial_url.txt"
     haveRequested = "/home/dyh/data/specialworker/judicial/haveRequestedDetail.txt"
     # haveRequested = "E:/DLdata/haveRequestedDetail.txt"
@@ -44,10 +44,10 @@ class JudicialOpinions(Spider):
     def open_file(self):
         self.file_handler = open(self.writeInFile, "a")  #写内容
         self.file_haveRequested = open(self.haveRequested, "a+")  #写入已请求成功的url
-        self.url_have_seen = set()
+        self.url_have_seen = "dup_detail"
         for line in self.file_haveRequested:
             fp = self.url_fingerprint(line)
-            self.url_have_seen.add(fp)
+            self.myRedis.sadd(self.url_have_seen,fp)
 
     def url_fingerprint(self, url):
         req = Request(url.strip())
@@ -68,13 +68,17 @@ class JudicialOpinions(Spider):
         """
         f = open(self.controlFile, "r")
         for url in f:     #for test
+            caseid = url.split("\001")[2]
+            url = url.strip().split("\001")[-1]
             fp = self.url_fingerprint(url)
-            if fp not in self.url_have_seen:
-                self.url_have_seen.add(fp)
-                yield Request(url.strip(), callback = self.detail, \
-                    dont_filter=False)
+            isexist = self.myRedis.sadd(self.url_have_seen,fp)
+            if isexist:
+                #如果redis set ppai_dup_redis没有则插入并返回1，否则
+                #返回0
+                yield Request(url, callback=self.detail,\
+                    dont_filter=False, meta={"trans":caseid})
             else:
-                pass 
+                pass
 
 
     def detail(self, response):
@@ -112,6 +116,7 @@ class JudicialOpinions(Spider):
             isid = len(re.findall(pat, id_case[0]))
             if isid == 0:
                 id_case = [""]
+            id_case = [response.meta["trans"]]  #最终的id号
             #================================================
             con = [court[0], classi[0], title[0],up_time[0],
             id_case[0], i_url]
