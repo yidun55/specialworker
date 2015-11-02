@@ -9,6 +9,7 @@ from scrapy import signals
 from scrapy.utils.request import request_fingerprint
 from specialworker.items import *
 import re
+import redis
 
 import sys
 reload(sys)
@@ -22,6 +23,7 @@ class JudicialOpinions(Spider):
     name = 'j_detail'
     download_delay = 1
     start_urls = ['http://www.baidu.com']
+    myRedis = redis.StrictRedis(host='localhost',port=6379) #connected to redis
     model_urls = "http://www.court.gov.cn/zgcpwsw/zj/"
     writeInFile = "/home/dyh/data/specialworker/judicial/judicial.txt"
     # writeInFile = "E:/DLdata/judicial.txt"
