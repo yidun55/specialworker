@@ -21,7 +21,7 @@ class JudicialOpinions(Spider):
     上抓取判决书数据并写入到文件中
     """
     name = 'all_url_j'
-    download_delay = 1
+    #download_delay = 1
     start_urls = ['http://www.baidu.com']
     myRedis = redis.StrictRedis(host='localhost',port=6379) #connected to redis
     model_urls = "http://www.court.gov.cn/extension/search.htm"
@@ -74,7 +74,7 @@ class JudicialOpinions(Spider):
     def parse(self, response):
         case_type = ["民事案件", "刑事案件", "行政案件",\
            "知识产权","赔偿案件", "执行案件"]
-        for i in case_type[0:1]:
+        for i in case_type:
             self.data["anjianleixing"] = i
             con = ["=".join(item) for item in self.data.items()]
             tail = "&".join(con)
@@ -92,7 +92,7 @@ class JudicialOpinions(Spider):
         total = sel.xpath("//table/tbody//script/text()").re(u"共[\D]*?([\d]*?)[\D]*?页")
         try:
             total = int(total[0]) + 1
-            for i in range(2, total)[0:1]:
+            for i in xrange(2, total):
                 self.data['page'] = str(i)
                 con = ["=".join(item) for item in self.data.items()]
                 tail = "&".join(con)
