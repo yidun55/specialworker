@@ -7,6 +7,11 @@
 #
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
+# import sys
+# import os
+# from os.path import dirname
+# path = dirname(dirname(os.path.abspath(os.path.dirname(__file__))))
+# sys.path.append(path)
 
 BOT_NAME = 'specialworker'
 
@@ -30,5 +35,7 @@ DOWNLOADER_MIDDLEWARES = {
 
 }
 
+# DUPEFILTER_CLASS = "specialworker.MyBloomFilter.BLOOMDupeFilter"
+LOG_LEVEL = 'INFO'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'specialworker (+http://www.yourdomain.com)'

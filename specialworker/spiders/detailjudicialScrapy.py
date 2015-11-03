@@ -21,7 +21,7 @@ class JudicialOpinions(Spider):
     上抓取判决书数据并写入到文件中
     """
     name = 'j_detail'
-    download_delay = 1
+    #download_delay = 1
     start_urls = ['http://www.baidu.com']
     myRedis = redis.StrictRedis(host='localhost',port=6379) #connected to redis
     model_urls = "http://www.court.gov.cn/zgcpwsw/zj/"
@@ -94,31 +94,25 @@ class JudicialOpinions(Spider):
         classi = sel.xpath("//div[@id='nav']/a[3]/text()").extract()
         title = sel.xpath("//div[@id='ws']//tr[1]/td/div/text()").extract()
         up_time = sel.xpath("//div[@id='wsTime']/span/text()").re(u"提交时间：(.*)")
-        id_case = sel.xpath("//div[@id='DocArea']/div[contains(@style, 'TEXT-ALIGN: right')][1]/text()").extract()
+        # id_case = sel.xpath("//div[@id='DocArea']/div[contains(@style, 'TEXT-ALIGN: right')][1]/text()").extract()
+        id_case = [response.meta["trans"]]
         i_url = response.url
-        if len(id_case) != 0:
-            doc = sel.xpath("//div[@id='DocArea']/*[count(*)=0]/text()").extract()
-        else:
-            tmp = sel.xpath("//div[@id='DocArea']")
-            container = tmp.xpath("string(.)").extract()
-            tmp1 = container[0].strip().split("\n")
-            tmp1_1 = [i.strip() for i in tmp1]
-            tmp2 = [i for i in tmp1_1 if (len(i)!=0 and len(filter(str.isalpha, i.encode('utf-8')))/float(len(i))<0.35)]
-            if len(tmp2) >=3:
-                id_case = [tmp2[2]]
-            else:
-                id_case = [""]
-            doc = tmp2
+        tmp = sel.xpath("//div[@id='DocArea']")
+        container = tmp.xpath("string(.)").extract()
+        tmp1 = container[0].strip().split("\n")
+        tmp1_1 = [i.strip() for i in tmp1]
+        tmp2 = [i for i in tmp1_1 if (len(i)!=0 and len(filter(str.isalpha, i.encode('utf-8')))/float(len(i))<0.35)]
+        doc = tmp2
         try:
             #================================================
-            """
-            判别id_case是否是id号
-            """
-            pat = ur"第[\d]"
-            isid = len(re.findall(pat, id_case[0]))
-            if isid == 0:
-                id_case = [""]
-            id_case = [response.meta["trans"]]  #最终的id号
+            # """
+            # 判别id_case是否是id号
+            # """
+            # pat = ur"第[\d]"
+            # isid = len(re.findall(pat, id_case[0]))
+            # if isid == 0:
+            #     id_case = [""]
+            # id_case = [response.meta["trans"]]  #最终的id号
             #================================================
             con = [court[0], classi[0], title[0],up_time[0],
             id_case[0], i_url]
