@@ -48,8 +48,11 @@ class JudicialOpinions(Spider):
         self.file_haveRequested = open(self.haveRequested, "a+")  #写入已请求成功的url
         self.url_have_seen = "dup_detail"
         for line in self.file_haveRequested:
-            fp = self.url_fingerprint(line)
-            self.myRedis.sadd(self.url_have_seen,fp)
+            try:
+                fp = self.url_fingerprint(line)
+                self.myRedis.sadd(self.url_have_seen,fp)
+            except Exception,e:
+                log.msg("url = %s info=%s"%(line.strip(), e), level=log.ERROR)
 
     def url_fingerprint(self, url):
         req = Request(url.strip())
@@ -72,8 +75,12 @@ class JudicialOpinions(Spider):
         for url in f:     #for test
             caseid = url.split("\001")[2]
             url = url.strip().split("\001")[-1]
-            fp = self.url_fingerprint(url)
-            isexist = self.myRedis.sadd(self.url_have_seen,fp)
+            try:
+                fp = self.url_fingerprint(url)
+                isexist = self.myRedis.sadd(self.url_have_seen,fp)
+            except Exception, e:
+                isexist = 0
+                log.msg("url=%s, info=%s"%(url, e), level=log.ERROR)
             if isexist:
                 #如果redis set ppai_dup_redis没有则插入并返回1，否则
                 #返回0
