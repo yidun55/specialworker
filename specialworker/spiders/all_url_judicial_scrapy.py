@@ -25,7 +25,7 @@ class JudicialOpinions(Spider):
     start_urls = ['http://www.baidu.com']
     myRedis = redis.StrictRedis(host='localhost',port=6379) #connected to redis
     model_urls = "http://www.court.gov.cn/extension/search.htm"
-    writeInFile = "/home/dyh/data/specialworker/judicial/all_url_j.txt"
+    writeInFile = "/home/dyh/data/specialworker/judicial/all_url_j_xs.txt"
     # writeInFile = "E:/DLdata/judicial_url.txt"
     haveRequested = "/home/dyh/data/specialworker/judicial/haveRequestedUrl.txt"
     # haveRequested = "E:/DLdata/haveRequestedUrl.txt"
@@ -74,7 +74,7 @@ class JudicialOpinions(Spider):
     def parse(self, response):
         case_type = ["民事案件", "刑事案件", "行政案件",\
            "知识产权","赔偿案件", "执行案件"]
-        for i in case_type:
+        for i in case_type[1:2]:
             self.data["anjianleixing"] = i
             con = ["=".join(item) for item in self.data.items()]
             tail = "&".join(con)
